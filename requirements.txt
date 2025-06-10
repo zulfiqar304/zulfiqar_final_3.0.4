@@ -6,4 +6,4 @@ requests
 flask==2.3.3
 flask
 pip install -r requirements.txt
-
+gunicorn
