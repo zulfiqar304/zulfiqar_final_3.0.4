@@ -4,6 +4,7 @@ from sqlalchemy.orm import aliased
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from register import register_bp
+from models import db
 import requests
 import uuid  # Import the UUID module
 from supabase_config import supabase, test_supabase_connection  # Import Supabase configuration
