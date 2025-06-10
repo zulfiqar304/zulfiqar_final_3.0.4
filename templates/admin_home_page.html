@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page Management - ZMWORLD Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">🏠 Home Page Management</h1>
+                    <p class="text-blue-100 mt-2">Customize your home page content</p>
+                </div>
+                <div class="text-right">
+                    <a href="{{ url_for('admin_panel') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200 mr-4">
+                        🛡️ Admin Panel
+                    </a>
+                    <a href="{{ url_for('home') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200">
+                        🏠 View Home Page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="bg-blue-100 text-blue-700 px-4 py-3 rounded-lg mb-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Add New Content Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">➕ Add New Content</h2>
+            <form method="POST" action="{{ url_for('add_home_content') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Section Type</label>
+                    <select name="section_type" required class="w-full p-3 border rounded-lg">
+                        <option value="hero">Hero Section</option>
+                        <option value="feature">Feature Card</option>
+                        <option value="offer">Special Offer</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                    <input type="number" name="display_order" value="0" class="w-full p-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <input type="text" name="title" required class="w-full p-3 border rounded-lg" placeholder="Enter title">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                    <input type="text" name="subtitle" class="w-full p-3 border rounded-lg" placeholder="Enter subtitle">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" rows="3" class="w-full p-3 border rounded-lg" placeholder="Enter description"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                    <input type="url" name="image_url" class="w-full p-3 border rounded-lg" placeholder="https://example.com/image.jpg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                    <input type="text" name="button_text" class="w-full p-3 border rounded-lg" placeholder="Get Started">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
+                    <input type="text" name="button_link" class="w-full p-3 border rounded-lg" placeholder="/register">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                    <select name="background_color" class="w-full p-3 border rounded-lg">
+                        <option value="bg-white">White</option>
+                        <option value="bg-gray-50">Light Gray</option>
+                        <option value="bg-blue-50">Light Blue</option>
+                        <option value="bg-green-50">Light Green</option>
+                        <option value="bg-yellow-50">Light Yellow</option>
+                        <option value="bg-purple-50">Light Purple</option>
+                        <option value="gradient-bg">Gradient</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                    <select name="text_color" class="w-full p-3 border rounded-lg">
+                        <option value="text-gray-900">Dark Gray</option>
+                        <option value="text-white">White</option>
+                        <option value="text-blue-600">Blue</option>
+                        <option value="text-green-600">Green</option>
+                        <option value="text-purple-600">Purple</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+                        ➕ Add Content
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Hero Section Content -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">🎯 Hero Section Content</h2>
+            <div class="space-y-4">
+                {% for content in hero_content %}
+                <div class="border rounded-lg p-4 {% if not content.is_active %}opacity-50{% endif %}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg">{{ content.title }}</h3>
+                            {% if content.subtitle %}
+                                <p class="text-gray-600">{{ content.subtitle }}</p>
+                            {% endif %}
+                            {% if content.description %}
+                                <p class="text-sm text-gray-500 mt-2">{{ content.description }}</p>
+                            {% endif %}
+                            {% if content.image_url %}
+                                <p class="text-xs text-blue-600 mt-1">Image: {{ content.image_url }}</p>
+                            {% endif %}
+                            <div class="flex gap-2 mt-2">
+                                <span class="text-xs px-2 py-1 {{ content.background_color }} rounded">{{ content.background_color }}</span>
+                                <span class="text-xs px-2 py-1 border rounded">Order: {{ content.display_order }}</span>
+                                <span class="text-xs px-2 py-1 {% if content.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} rounded">
+                                    {% if content.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="editContent({{ content.id }}, 'hero')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+                            <form method="POST" action="{{ url_for('toggle_home_content', content_id=content.id) }}" class="inline">
+                                <button type="submit" class="{% if content.is_active %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white px-3 py-1 rounded text-xs">
+                                    {% if content.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_home_content', content_id=content.id) }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Feature Cards Content -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">⭐ Feature Cards Content</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for content in feature_content %}
+                <div class="border rounded-lg p-4 {% if not content.is_active %}opacity-50{% endif %}">
+                    <div class="mb-3">
+                        <h3 class="font-semibold">{{ content.title }}</h3>
+                        {% if content.description %}
+                            <p class="text-sm text-gray-600 mt-1">{{ content.description }}</p>
+                        {% endif %}
+                        {% if content.image_url %}
+                            <img src="{{ content.image_url }}" alt="{{ content.title }}" class="w-full h-32 object-cover rounded mt-2">
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs px-2 py-1 {% if content.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} rounded">
+                            {% if content.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        <div class="flex gap-1">
+                            <button onclick="editContent({{ content.id }}, 'feature')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Edit</button>
+                            <form method="POST" action="{{ url_for('toggle_home_content', content_id=content.id) }}" class="inline">
+                                <button type="submit" class="{% if content.is_active %}bg-yellow-500{% else %}bg-green-500{% endif %} text-white px-2 py-1 rounded text-xs">
+                                    {% if content.is_active %}Hide{% else %}Show{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_home_content', content_id=content.id) }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                                <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Del</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Special Offers Content -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">🎁 Special Offers Content</h2>
+            <div class="space-y-4">
+                {% for content in offer_content %}
+                <div class="border rounded-lg p-4 {% if not content.is_active %}opacity-50{% endif %}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg">{{ content.title }}</h3>
+                            {% if content.subtitle %}
+                                <p class="text-gray-600">{{ content.subtitle }}</p>
+                            {% endif %}
+                            {% if content.description %}
+                                <p class="text-sm text-gray-500 mt-2">{{ content.description }}</p>
+                            {% endif %}
+                            {% if content.button_text and content.button_link %}
+                                <p class="text-xs text-blue-600 mt-1">Button: {{ content.button_text }} → {{ content.button_link }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="editContent({{ content.id }}, 'offer')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Edit</button>
+                            <form method="POST" action="{{ url_for('toggle_home_content', content_id=content.id) }}" class="inline">
+                                <button type="submit" class="{% if content.is_active %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white px-3 py-1 rounded text-xs">
+                                    {% if content.is_active %}Hide{% else %}Show{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_home_content', content_id=content.id) }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-4">Edit Content</h3>
+            <form id="editForm" method="POST" class="space-y-4">
+                <input type="hidden" id="editContentId" name="content_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                        <input type="text" id="editTitle" name="title" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                        <input type="text" id="editSubtitle" name="subtitle" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="editDescription" name="description" rows="3" class="w-full p-3 border rounded-lg"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                        <input type="url" id="editImageUrl" name="image_url" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                        <input type="text" id="editButtonText" name="button_text" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
+                        <input type="text" id="editButtonLink" name="button_link" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                        <input type="number" id="editDisplayOrder" name="display_order" class="w-full p-3 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                        <select id="editBackgroundColor" name="background_color" class="w-full p-3 border rounded-lg">
+                            <option value="bg-white">White</option>
+                            <option value="bg-gray-50">Light Gray</option>
+                            <option value="bg-blue-50">Light Blue</option>
+                            <option value="bg-green-50">Light Green</option>
+                            <option value="bg-yellow-50">Light Yellow</option>
+                            <option value="bg-purple-50">Light Purple</option>
+                            <option value="gradient-bg">Gradient</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                        <select id="editTextColor" name="text_color" class="w-full p-3 border rounded-lg">
+                            <option value="text-gray-900">Dark Gray</option>
+                            <option value="text-white">White</option>
+                            <option value="text-blue-600">Blue</option>
+                            <option value="text-green-600">Green</option>
+                            <option value="text-purple-600">Purple</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Save Changes</button>
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function editContent(contentId, sectionType) {
+            // This would typically fetch content data via AJAX
+            // For now, we'll just open the modal and set the form action
+            document.getElementById('editForm').action = `/admin/edit-home-content/${contentId}`;
+            document.getElementById('editContentId').value = contentId;
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('flex');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
