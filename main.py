@@ -657,6 +657,7 @@ def register():
             referral_code=user_referral_code,
             referred_by=used_referral if used_referral else None
         )
+        sync_user_data_to_supabase(new_user.id)
         db.session.add(new_user)
         db.session.commit()
 
@@ -711,6 +712,7 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', referral=referral_code)
+sync_user_data_to_supabase(new_user.id)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
