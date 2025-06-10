@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,6 +25,134 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <script>
+// Auto-refresh live stats every 30 seconds
+setInterval(function() {
+    fetch('/api/admin/live-stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) return;
+
+            // Update online users count
+            const onlineElement = document.getElementById('online-users-count');
+            if (onlineElement) {
+                onlineElement.textContent = data.online_users;
+            }
+
+            // Update today's ad stats
+            const adsElement = document.getElementById('total-ads-today');
+            if (adsElement) {
+                adsElement.textContent = data.total_ads_watched_today + data.total_direct_ads_watched_today;
+            }
+
+            // Update active ad watchers
+            const watchersElement = document.getElementById('active-watchers');
+            if (watchersElement) {
+                watchersElement.textContent = data.active_ad_watchers;
+            }
+
+            // Update timestamp
+            const timestampElement = document.getElementById('last-update');
+            if (timestampElement) {
+                timestampElement.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+            }
+        })
+        .catch(error => console.error('Error fetching live stats:', error));
+}, 30000);
+
+function viewUserActivity(userId) {
+    fetch(`/api/admin/user-activity/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+
+            // Show user activity modal or update display
+            showUserActivityModal(data);
+        })
+        .catch(error => console.error('Error fetching user activity:', error));
+}
+
+function showUserActivityModal(data) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">User Activity: ${data.username}</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded">
+                    <p class="text-sm text-gray-600">Current Coins</p>
+                    <p class="text-2xl font-bold text-blue-600">${data.coins}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded">
+                    <p class="text-sm text-gray-600">Ads Watched Today</p>
+                    <p class="text-2xl font-bold text-green-600">${data.ads_watched_today + data.direct_ads_watched_today}</p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="font-semibold mb-2">Recent Transactions</h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    ${data.recent_transactions.map(t => `
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span class="text-sm">${t.description}</span>
+                            <span class="font-semibold ${t.amount > 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${t.amount > 0 ? '+' : ''}${t.amount}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-semibold mb-2">Recent Orders</h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    ${data.recent_orders.map(o => `
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span class="text-sm">${o.service_name}</span>
+                            <span class="px-2 py-1 rounded text-xs ${
+                                o.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                o.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">${o.status}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+</script>
+    <script>
+        // Auto-refresh online users count every 30 seconds
+        function updateOnlineUsersCount() {
+            fetch('/api/online-users-count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.online_users !== undefined) {
+                        const onlineCountElement = document.getElementById('online-users-count');
+                        if (onlineCountElement) {
+                            onlineCountElement.textContent = data.online_users;
+                        }
+                    }
+                })
+                .catch(error => console.log('Error updating online users count:', error));
+        }
+
+        // Update every 30 seconds
+        setInterval(updateOnlineUsersCount, 30000);
+    </script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="flex">
@@ -36,81 +163,81 @@
                     <h1 class="text-2xl font-bold">🛡️ ZMWORLD</h1>
                     <p class="text-blue-100 text-sm">Admin Panel</p>
                 </div>
-                
+
                 <!-- Navigation Links -->
                 <nav class="space-y-2">
                     <h3 class="text-xs uppercase tracking-wider text-blue-200 font-semibold mb-3">Core Management</h3>
-                    
+
                     <a href="{{ url_for('admin_coins') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🪙</span>
                         <span>Coin System</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_services') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🛠️</span>
                         <span>Services</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_api_settings') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">⚙️</span>
                         <span>API Settings</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_api_management') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🔧</span>
                         <span>API Management</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_ad_management') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">📺</span>
                         <span>Ad Management</span>
                     </a>
-                    
+
                     <h3 class="text-xs uppercase tracking-wider text-blue-200 font-semibold mb-3 mt-6">User Management</h3>
-                    
+
                     <a href="{{ url_for('admin_referrals') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">👥</span>
                         <span>Referrals</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_coin_purchases') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">💳</span>
                         <span>Purchases</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_support_tickets') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🎧</span>
                         <span>Support</span>
                     </a>
-                    
+
                     <h3 class="text-xs uppercase tracking-wider text-blue-200 font-semibold mb-3 mt-6">Content & Security</h3>
-                    
+
                     <a href="{{ url_for('admin_announcements') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">📢</span>
                         <span>Announcements</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_home_page') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🏠</span>
                         <span>Home Page</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_apk_management') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">📱</span>
                         <span>APK Files</span>
                     </a>
-                    
+
                     <a href="{{ url_for('admin_password_resets') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                         <span class="mr-3">🔐</span>
                         <span>Password Resets</span>
                     </a>
-                    
+
                     <div class="border-t border-blue-300 border-opacity-30 mt-6 pt-6">
                         <a href="{{ url_for('home') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg">
                             <span class="mr-3">🌐</span>
                             <span>View Website</span>
                         </a>
-                        
+
                         <a href="{{ url_for('admin_logout') }}" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-red-200 hover:text-white">
                             <span class="mr-3">🚪</span>
                             <span>Logout</span>
@@ -153,19 +280,25 @@
                 {% endwith %}
 
                 <!-- Statistics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                     <div class="stats-card rounded-xl shadow-lg p-6 text-center border">
                         <div class="text-4xl font-bold text-blue-600 mb-2">{{ users|length }}</div>
                         <div class="text-gray-600 font-medium">Total Users</div>
                         <div class="text-xs text-gray-400 mt-1">Registered members</div>
                     </div>
-                    
+
+                    <div class="stats-card rounded-xl shadow-lg p-6 text-center border">
+                        <div id="online-users-count" class="text-4xl font-bold text-green-600 mb-2">{{ online_users_count }}</div>
+                        <div class="text-gray-600 font-medium">Online Users</div>
+                        <div class="text-xs text-gray-400 mt-1">Active in last 5 min</div>
+                    </div>
+
                     <div class="stats-card rounded-xl shadow-lg p-6 text-center border">
                         <div class="text-4xl font-bold text-green-600 mb-2">{{ orders|length }}</div>
                         <div class="text-gray-600 font-medium">Total Orders</div>
                         <div class="text-xs text-gray-400 mt-1">All time orders</div>
                     </div>
-                    
+
                     <div class="stats-card rounded-xl shadow-lg p-6 text-center border">
                         <div class="text-4xl font-bold text-orange-600 mb-2">
                             {{ orders|selectattr('0.status', 'equalto', 'Pending')|list|length }}
@@ -173,7 +306,7 @@
                         <div class="text-gray-600 font-medium">Pending Orders</div>
                         <div class="text-xs text-gray-400 mt-1">Requires attention</div>
                     </div>
-                    
+
                     <div class="stats-card rounded-xl shadow-lg p-6 text-center border">
                         <div class="text-4xl font-bold text-purple-600 mb-2">
                             {{ users|sum(attribute='coins')|int }}
@@ -220,11 +353,11 @@
                         <table class="min-w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Info</th>
-                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level & Stats</th>
-                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coins</th>
-                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Info</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level & Stats</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coins</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
