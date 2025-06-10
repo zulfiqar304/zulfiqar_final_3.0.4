@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime
 from models import db, User  # make sure these are correctly imported
 from supabase_config import supabase  # Supabase client
-from your_project.sync import sync_user_data_to_supabase  # If you moved sync logic to another file
 
 register_bp = Blueprint('register', __name__)
 
