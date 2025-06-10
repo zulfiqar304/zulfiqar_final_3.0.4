@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Order - Social Media Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .note { color: #6b7280; font-size: 0.875rem; margin: 0.5rem 0; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">📋 Place New Order</h1>
+
+            <div id="loading" class="text-center py-8">
+                <div class="loading-spinner"></div>
+                <p class="mt-4 text-gray-600">Loading services...</p>
+            </div>
+
+            <div id="error" class="text-center py-8 text-red-600" style="display:none;">
+                <p>❌ Failed to load services. Please refresh the page.</p>
+            </div>
+
+            <form id="orderForm" method="POST" style="display:none;">
+                <div class="space-y-6">
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Service Category:</label>
+                        <select id="category" name="category" onchange="populateServices()" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select a category</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="service" class="block text-sm font-medium text-gray-700 mb-2">Service:</label>
+                        <select id="service" name="service" onchange="updateServiceDetails()" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">First select a category</option>
+                        </select>
+                        <input type="hidden" id="service_id" name="service_id">
+                        <input type="hidden" id="service_name" name="service_name">
+                        <input type="hidden" id="service_rate" name="service_rate">
+                    </div>
+
+                    <div id="serviceInfo" class="bg-blue-50 border border-blue-200 rounded-lg p-4" style="display:none;">
+                        <div id="serviceDetails"></div>
+                    </div>
+
+                    <div>
+                        <label for="link" class="block text-sm font-medium text-gray-700 mb-2">Link:</label>
+                        <input type="url" id="link" name="link" placeholder="Enter profile/post URL" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="100" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="note">Coins Required: <strong id="coinsDisplay">0</strong></p>
+                        <p class="note">Your current balance: <strong>{{ user.coins }}</strong> coins</p>
+                    </div>
+
+                    <button type="submit" id="submitBtn" disabled class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200">
+                        Place Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    let allServices = [];
+    let categories = {};
+    const userCoins = {{ user.coins }};
+
+    // Load services from API
+    fetch('/api/services')
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data)) {
+                allServices = data;
+                processServices();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('orderForm').style.display = 'block';
+            } else {
+                throw new Error('Invalid data format');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading services:', error);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        });
+
+    function processServices() {
+        // Group services by category
+        categories = {};
+        allServices.forEach(service => {
+            if (!categories[service.category]) {
+                categories[service.category] = [];
+            }
+            categories[service.category].push(service);
+        });
+
+        // Populate category dropdown
+        const categorySelect = document.getElementById('category');
+        Object.keys(categories).forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+    }
+
+    function populateServices() {
+        const categorySelect = document.getElementById('category');
+        const serviceSelect = document.getElementById('service');
+        const selectedCategory = categorySelect.value;
+
+        // Clear existing options
+        serviceSelect.innerHTML = '<option value="">Select a service</option>';
+
+        if (selectedCategory && categories[selectedCategory]) {
+            categories[selectedCategory].forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.service;
+                option.textContent = `${service.name} - ${service.rate} coins per 1000`;
+                option.dataset.service = JSON.stringify(service);
+                serviceSelect.appendChild(option);
+            });
+        }
+
+        // Reset service details
+        document.getElementById('serviceInfo').style.display = 'none';
+        updateCoinsRequired();
+    }
+
+    function updateServiceDetails() {
+        const serviceSelect = document.getElementById('service');
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        const serviceInfo = document.getElementById('serviceInfo');
+        const serviceDetails = document.getElementById('serviceDetails');
+
+        if (selectedOption && selectedOption.dataset.service) {
+            const service = JSON.parse(selectedOption.dataset.service);
+
+            // Update hidden fields
+            document.getElementById('service_id').value = service.service;
+            document.getElementById('service_name').value = service.name;
+            document.getElementById('service_rate').value = service.rate;
+
+            // Update quantity input constraints and value
+            const quantityInput = document.getElementById('quantity');
+            quantityInput.min = service.min;
+            quantityInput.max = service.max;
+
+            // Set quantity to minimum when service changes
+            quantityInput.value = service.min;
+
+            // Show service details
+            serviceDetails.innerHTML = `
+                <h4 class="font-medium text-blue-800 mb-2">${service.name}</h4>
+                <p class="text-sm text-blue-700 mb-2">${service.description || 'High quality service'}</p>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div><strong>Rate:</strong> ${service.rate} coins per 1000</div>
+                    <div><strong>Min:</strong> ${service.min}</div>
+                    <div><strong>Max:</strong> ${service.max}</div>
+                    <div><strong>Category:</strong> ${service.category}</div>
+                </div>
+            `;
+            serviceInfo.style.display = 'block';
+        } else {
+            serviceInfo.style.display = 'none';
+        }
+
+        updateCoinsRequired();
+    }
+
+    function updateCoinsRequired() {
+        const serviceRate = parseFloat(document.getElementById('service_rate').value) || 0;
+        const quantity = parseInt(document.getElementById('quantity').value) || 0;
+        const quantityInput = document.getElementById('quantity');
+        const minQuantity = parseInt(quantityInput.min) || 1;
+        const maxQuantity = parseInt(quantityInput.max) || 999999;
+
+        // Calculate coins based on per-1000 rate
+        const coins = Math.ceil((quantity / 1000.0) * serviceRate);
+
+        // Update display
+        document.getElementById('coinsDisplay').textContent = coins;
+
+        // Enable/disable submit button
+        const submitBtn = document.getElementById('submitBtn');
+        const serviceSelected = document.getElementById('service').value;
+        const linkFilled = document.getElementById('link').value.trim();
+
+        // Check all validation conditions
+        const quantityValid = quantity >= minQuantity && quantity <= maxQuantity && quantity > 0;
+        const coinsValid = coins <= userCoins && coins > 0;
+        const fieldsValid = serviceSelected && linkFilled;
+
+        // Determine button state and message
+        if (!fieldsValid) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Please fill all fields';
+        } else if (!quantityValid && quantity > 0) {
+            submitBtn.disabled = true;
+            if (quantity < minQuantity) {
+                submitBtn.textContent = `Minimum quantity: ${minQuantity}`;
+            } else if (quantity > maxQuantity) {
+                submitBtn.textContent = `Maximum quantity: ${maxQuantity}`;
+            }
+        } else if (!coinsValid && coins > userCoins) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Insufficient coins';
+        } else if (quantityValid && coinsValid && fieldsValid) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Place Order';
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Place Order';
+        }
+    }
+
+    // Add event listeners for real-time validation
+    document.getElementById('link').addEventListener('input', updateCoinsRequired);
+    document.getElementById('quantity').addEventListener('input', updateCoinsRequired);
+    document.getElementById('quantity').addEventListener('change', updateCoinsRequired);
+</script>
+
+</body>
+</html>

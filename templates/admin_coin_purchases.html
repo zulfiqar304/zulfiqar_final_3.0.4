@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Purchases - ZMWORLD Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">💳 EasyPaisa Coin Purchases</h1>
+                    <p class="text-blue-100 mt-2">Verify and manage coin purchase transactions</p>
+                </div>
+                <div class="text-right">
+                    <a href="{{ url_for('admin_panel') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200 mr-4">
+                        🛡️ Admin Panel
+                    </a>
+                    <a href="{{ url_for('admin_coins') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200 mr-4">
+                        🪙 Coin Management
+                    </a>
+                    <a href="{{ url_for('home') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200">
+                        🏠 Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="bg-blue-100 text-blue-700 px-4 py-3 rounded-lg mb-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600">{{ stats.total_purchases }}</div>
+                <div class="text-gray-600 text-sm">Total Purchases</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-yellow-600">{{ stats.pending_purchases }}</div>
+                <div class="text-gray-600 text-sm">Pending Verification</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-green-600">{{ stats.approved_purchases }}</div>
+                <div class="text-gray-600 text-sm">Approved</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-red-600">{{ stats.rejected_purchases }}</div>
+                <div class="text-gray-600 text-sm">Rejected</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-purple-600">{{ "%.0f"|format(stats.total_revenue) }}</div>
+                <div class="text-gray-600 text-sm">PKR Revenue</div>
+            </div>
+        </div>
+
+        <!-- Current Rate Display -->
+        <div class="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-green-800">Current Exchange Rate</h3>
+                    <p class="text-green-700">{{ coin_rate }} PKR = 1 Coin</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-green-600">EasyPaisa Account</p>
+                    <p class="text-lg font-bold text-green-800">+92-343-3662304</p>
+                    <p class="text-sm text-green-600">Zulfiqar Ali</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchases Table -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">💳 Recent Purchase Requests</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-3 text-left">ID</th>
+                            <th class="px-4 py-3 text-left">User</th>
+                            <th class="px-4 py-3 text-left">Transaction ID</th>
+                            <th class="px-4 py-3 text-left">Amount (PKR)</th>
+                            <th class="px-4 py-3 text-left">Coins</th>
+                            <th class="px-4 py-3 text-left">Sender Details</th>
+                            <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-4 py-3 text-left">Date</th>
+                            <th class="px-4 py-3 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purchase, user in purchases %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-3">#{{ purchase.id }}</td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">{{ user.username }}</div>
+                                <div class="text-sm text-gray-500">{{ user.email }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                                    {{ purchase.transaction_id }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="font-bold text-green-600">{{ purchase.amount_pkr }} PKR</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-bold">{{ purchase.coins_requested }} coins</div>
+                                {% if purchase.coins_awarded > 0 %}
+                                <div class="text-sm text-green-600">Awarded: {{ purchase.coins_awarded }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm">
+                                    <div><strong>Name:</strong> {{ purchase.sender_name }}</div>
+                                    <div><strong>Phone:</strong> {{ purchase.sender_phone }}</div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if purchase.status == 'approved' %}
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">✅ Approved</span>
+                                {% elif purchase.status == 'rejected' %}
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">❌ Rejected</span>
+                                {% else %}
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">⏳ Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm">{{ purchase.created_at.strftime('%Y-%m-%d') }}</div>
+                                <div class="text-xs text-gray-500">{{ purchase.created_at.strftime('%H:%M') }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if purchase.status == 'pending' %}
+                                <div class="space-y-2">
+                                    <!-- Approve Form -->
+                                    <form method="POST" action="{{ url_for('verify_coin_purchase', purchase_id=purchase.id) }}" class="inline">
+                                        <input type="hidden" name="action" value="approve">
+                                        <div class="mb-2">
+                                            <input type="number" name="coins_to_award" value="{{ purchase.coins_requested }}" 
+                                                   class="w-20 p-1 border rounded text-xs" min="1">
+                                            <span class="text-xs">coins</span>
+                                        </div>
+                                        <div class="mb-2">
+                                            <input type="text" name="admin_notes" placeholder="Notes..." 
+                                                   class="w-full p-1 border rounded text-xs">
+                                        </div>
+                                        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 w-full"
+                                                onclick="return confirm('Approve this purchase and award coins?')">
+                                            ✅ Approve
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Reject Form -->
+                                    <form method="POST" action="{{ url_for('verify_coin_purchase', purchase_id=purchase.id) }}" class="inline">
+                                        <input type="hidden" name="action" value="reject">
+                                        <div class="mb-2">
+                                            <input type="text" name="admin_notes" placeholder="Rejection reason..." 
+                                                   class="w-full p-1 border rounded text-xs">
+                                        </div>
+                                        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600 w-full"
+                                                onclick="return confirm('Reject this purchase?')">
+                                            ❌ Reject
+                                        </button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <div class="text-xs text-gray-500">
+                                    {% if purchase.admin_notes %}
+                                    <div><strong>Notes:</strong> {{ purchase.admin_notes }}</div>
+                                    {% endif %}
+                                    {% if purchase.verified_at %}
+                                    <div><strong>Verified:</strong> {{ purchase.verified_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if purchase.notes %}
+                        <tr class="bg-blue-50">
+                            <td colspan="9" class="px-4 py-2 text-sm text-blue-800">
+                                <strong>User Notes:</strong> {{ purchase.notes }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-500 pb-8">
+            <p>💳 EasyPaisa Coin Purchase Management - ZMWORLD Admin Panel</p>
+        </div>
+    </div>
+</body>
+</html>
