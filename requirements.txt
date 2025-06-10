@@ -5,10 +5,4 @@ requests==2.31.0
 requests
 flask==2.3.3
 flask
-flask
-flask
-flask
-flask
-flask
-flask
 pip install -r
