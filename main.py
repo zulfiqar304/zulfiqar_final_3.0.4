@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import aliased
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+from register import register_bp
 import requests
 import uuid  # Import the UUID module
 from supabase_config import supabase, test_supabase_connection  # Import Supabase configuration
@@ -12,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'your_super_secret_key_here'  # Change to something strong
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+app.register_blueprint(register_bp)
 db = SQLAlchemy(app)
 
 # ---------------------- DATABASE MODELS ---------------------- #
