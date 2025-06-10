@@ -18,8 +18,6 @@ app.register_blueprint(register_bp)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:[EnergySystem7130@]@db.qwpghbpprmmhhlxjsllc.supabase.co:5432/postgres'  # Ya jo bhi URI hai
 db.init_app(app)
 
-db = SQLAlchemy(app)
-
 # ---------------------- DATABASE MODELS ---------------------- #
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
