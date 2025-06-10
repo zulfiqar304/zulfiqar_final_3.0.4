@@ -15,6 +15,9 @@ app.secret_key = 'your_super_secret_key_here'  # Change to something strong
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.register_blueprint(register_bp)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:[EnergySystem7130@]@db.qwpghbpprmmhhlxjsllc.supabase.co:5432/postgres'  # Ya jo bhi URI hai
+db.init_app(app)
+
 db = SQLAlchemy(app)
 
 # ---------------------- DATABASE MODELS ---------------------- #
