@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Settings - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">⚙️ API Settings</h1>
+                    <p class="text-blue-100 mt-2">Manage JAP API Configuration</p>
+                </div>
+                <div class="text-right">
+                    <a href="{{ url_for('admin_panel') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200">
+                        ← Back to Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="bg-blue-100 text-blue-700 px-4 py-3 rounded-lg mb-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Current API Settings -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">📡 Current API Settings</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">API URL:</h3>
+                    <p class="text-sm text-gray-600 break-all">{{ current_api_url }}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">API Key:</h3>
+                    <p class="text-sm text-gray-600">{{ current_api_key[:20] }}***</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button onclick="testConnection()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                    🔗 Test API Connection
+                </button>
+                <div id="testResult" class="mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Update API Settings -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">🔧 Update API Settings</h2>
+            <form method="POST" action="{{ url_for('update_api_settings') }}" onsubmit="return confirm('Are you sure you want to update API settings? This will affect all service operations.')">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            API URL:
+                        </label>
+                        <input 
+                            type="url" 
+                            name="api_url" 
+                            value="{{ current_api_url }}"
+                            required
+                            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="https://justanotherpanel.com/api/v2"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">The base URL for the JAP API</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            API Key:
+                        </label>
+                        <input 
+                            type="text" 
+                            name="api_key" 
+                            value="{{ current_api_key }}"
+                            required
+                            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Your JAP API Key"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Your JAP API authentication key</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button 
+                        type="submit" 
+                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+                    >
+                        💾 Update API Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- API Information -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">ℹ️ API Information</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <h3 class="font-bold text-blue-800 mb-2">🔑 Getting Your API Key</h3>
+                    <p class="text-blue-700 text-sm">
+                        To get your JAP API key, visit JustAnotherPanel.com, go to your account settings, 
+                        and generate an API key from the developer section.
+                    </p>
+                </div>
+                
+                <div class="p-4 bg-yellow-50 rounded-lg">
+                    <h3 class="font-bold text-yellow-800 mb-2">⚠️ Important Notes</h3>
+                    <ul class="text-yellow-700 text-sm space-y-1">
+                        <li>• Keep your API key secure and never share it publicly</li>
+                        <li>• Test the connection after updating settings</li>
+                        <li>• Changes will affect all service operations immediately</li>
+                        <li>• Make sure your API key has sufficient permissions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function testConnection() {
+        const button = document.querySelector('button[onclick="testConnection()"]');
+        const resultDiv = document.getElementById('testResult');
+        
+        button.textContent = '🔄 Testing...';
+        button.disabled = true;
+        
+        fetch('/admin/test-api-connection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resultDiv.innerHTML = `<div class="text-green-600 text-sm">✅ ${data.message}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="text-red-600 text-sm">❌ ${data.message}</div>`;
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = `<div class="text-red-600 text-sm">❌ Error: ${error.message}</div>`;
+        })
+        .finally(() => {
+            button.textContent = '🔗 Test API Connection';
+            button.disabled = false;
+        });
+    }
+    </script>
+</body>
+</html>
