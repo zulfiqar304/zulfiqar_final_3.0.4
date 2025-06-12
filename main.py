@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import aliased
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+from flask import send_from_directory
 import requests
 import uuid  # Import the UUID module
 from supabase_config import supabase, test_supabase_connection  # Import Supabase configuration
@@ -687,6 +688,9 @@ def home():
 hero_content=hero_content,
                          feature_content=feature_content,
                          offer_content=offer_content)
+@app.route('/<e3b246db658940c05813>.txt')
+def serve_verification_file(e3b246db658940c05813):
+    return send_from_directory('static', f'{e3b246db658940c05813}.txt')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
