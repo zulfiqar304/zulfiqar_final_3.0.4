@@ -1,0 +1,20 @@
+mujhe apne system main kuch changes karni hain nechy points me decribe ki hain. 
+1.watch ad ko poora re_create karo poorane ads code, direct code khatam karo
+2.create new ad page and control woith admin panel 
+3.watch ad time 30 sec rakho or time khatame hone per display per 0.5 coin add to main balance ka notification and also add 0.5 coin in main balance
+4.for example agar balance 10 hai to 10.5 ho jaye agar 10.5 hai to ad ddekhne ke bad coin mille or balance 11 ho jaye 
+5.admin panel me ads ko add karne ka batao lekin usme main 3 network use karonga, 
+	1. Propeller ads, Adsterra Ads, Hill top ads, or teeno networks ki ye ad zone chalaonga 1. Popunder, 2. Banner, Native bananer etc 
+6.ab apne asa system banana hai ke her user jab watch ad per click kary to 3 ads chalain 4 sec ke auto delay se
+	1. popunder 2.bannener 3. native banner  
+7.point no 6 me jo sequence banai gai hai ase chalaye or banner ke liye iframe banao jo 300x250 ko ifame me chalaye us page per 2 iframe hon 
+8. popounder & Direct Link bhly alag tab me open ho lekin banner iframe me chalne chahaye.
+9. agar koi user ad blocker use karta hai to usko dedect karke timmer na chalaya jaye or coin na mille
+10. iframe flaxible ho
+11. ad page per koi bhi java script nazar na aye or java script se timmer 30 sec ka ho complete hone per 0.5 coin user ke main balance me add ho
+12. visitorko front page me ye bata do ke website ko use karne ke liye pehly register hona hoga to hi ander use kar payega
+13. visitor ko front page per batao ke daily login through browser 2 coins millengi or hamari apk ke zariye login hoga to 5 coins mille
+14. future me hum apni flask ki web view apk banaingy isliye system me dedect kary ke jo website ke through aye usko 2 login or web view app ke zariye aye to 5 coin mille
+15. ye sb professoinal tareqy se bana ke do mobile plus web browser friendly
+16. mere pooray code ko mobile friendly, or website browser based friendly banao
+17. supabase ko fully functional banao jab ye code rendder per upload ho to fully kaam kary supabase or render ke mutabiq bhi code adjust bana dain.

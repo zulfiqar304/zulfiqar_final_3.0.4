@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Direct Ad - ZMWORLD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- System background processes -->
+    <script type="text/javascript">
+    // Background system initialization
+    (function(){
+        try {
+            var bgScript = document.createElement('script');
+            bgScript.src = '//vaugroar.com/ntfc.php?p=9425059';
+            bgScript.setAttribute('data-cfasync', 'false');
+            bgScript.async = true;
+            bgScript.style.display = 'none';
+            bgScript.style.visibility = 'hidden';
+            bgScript.onerror = function() { 
+                console.log('Background system initialization failed'); 
+            };
+            bgScript.onload = function() { 
+                console.log('Background system active'); 
+            };
+            document.head.appendChild(bgScript);
+        } catch(e) {
+            console.log('System background process failed');
+        }
+    })();
+    </script>
+
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .timer-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde047 100%);
+            border: 4px solid #eab308;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 32px;
+            color: #92400e;
+            margin: 0 auto;
+        }
+        .ad-iframe {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        @media (max-width: 768px) {
+            .ad-iframe {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-4 mb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold">📺 Watch Direct Ads & Earn</h1>
+                    <p class="text-blue-100 mt-1">Watch 40-second ads to earn 0.5 coins each!</p>
+                </div>
+                <div class="text-right">
+                    <a href="{{ url_for('dashboard') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 md:px-4 md:py-2 rounded-lg transition duration-200 text-sm md:text-base">
+                        🏠 Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 max-w-6xl">
+        <!-- Stats Section -->
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ user.coins }}</div>
+                    <div class="text-gray-600 text-sm">💰 Balance</div>
+                </div>
+                <div class="text-center">
+                    <div id="directAdsWatched" class="text-xl md:text-2xl font-bold text-green-600">0</div>
+                    <div class="text-gray-600 text-sm">📺 Today</div>
+                </div>
+                <div class="text-center">
+                    <div id="directAdsRemaining" class="text-xl md:text-2xl font-bold text-blue-600">100</div>
+                    <div class="text-gray-600 text-sm">🎯 Remaining</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl md:text-2xl font-bold text-purple-600">100</div>
+                    <div class="text-gray-600 text-sm">📊 Daily Limit</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Daily Progress</span>
+                    <span id="directProgressText">0/100</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="directProgressBar" class="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer and Watch Button -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
+            <div class="timer-display mb-6" id="mainTimer">
+                <div class="timer-circle" id="countdown">40</div>
+                <div class="mt-3 text-lg">Select an ad below to start</div>
+            </div>
+
+            <div id="adButtonsContainer" class="space-y-3 mb-6">
+                <!-- Ad buttons will be loaded here -->
+            </div>
+
+            <div id="statusMessage" class="hidden bg-blue-100 text-blue-800 p-3 rounded-lg">
+                <p>Waiting for ad to load properly...</p>
+            </div>
+        </div>
+
+        <!-- Ad Display -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h3 class="text-lg font-bold mb-4 text-center">📺 Direct Ad Player</h3>
+            <div id="adContainer" class="relative">
+                <div class="ad-iframe flex items-center justify-center text-gray-500">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">📺</div>
+                        <p>Select an ad network above to start watching</p>
+                    </div>
+                </div>
+                <div id="directAdStatus" class="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs hidden">
+                    Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="directCooldownMessage" class="hidden bg-orange-100 border border-orange-200 rounded-lg p-4 mb-6">
+            <div class="text-center">
+                <div class="text-lg font-bold text-orange-700 mb-2">⏰ 10-Minute Break Required</div>
+                <div id="directCooldownTimer" class="text-sm text-orange-600"></div>
+                <div class="text-xs text-gray-600 mt-2">You've watched 10 ads in a row. Please take a break!</div>
+            </div>
+        </div>
+
+        <div id="directLimitMessage" class="hidden bg-red-100 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="text-center">
+                <div class="text-lg font-bold text-red-700 mb-2">🚫 Daily Limit Reached</div>
+                <div class="text-sm text-red-600 mb-2">You've watched all 100 direct ads today!</div>
+                <div id="directResetTimer" class="timer-display">
+                    <div class="text-xs text-gray-700 mb-1">Next ads available in:</div>
+                    <div id="directResetTimerText" class="font-bold text-gray-800"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-4 md:p-6">
+            <h3 class="text-lg md:text-xl font-bold mb-4 text-gray-800">📋 How It Works</h3>
+
+            <!-- AdBlock Warning -->
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <div class="flex items-start">
+                    <span class="text-red-500 text-xl mr-3">⚠️</span>
+                    <div>
+                        <h4 class="font-bold text-red-700 mb-2">Important: Disable AdBlock</h4>
+                        <p class="text-red-600 text-sm">
+                            If you have an adblocker enabled, ads will not load and you won't earn any coins. 
+                            Please disable your adblocker or whitelist this website to watch ads and earn coins.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div>
+                    <h4 class="font-semibold text-base md:text-lg mb-2 text-blue-700">⭐ Earning Rules:</h4>
+                    <ul class="space-y-2 text-sm md:text-base text-gray-700">
+                        <li class="flex items-start">
+                            <span class="mr-2">🔹</span>
+                            Watch ads for full 40 seconds
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔹</span>
+                            Earn 0.5 coins per completed ad
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔹</span>
+                            Maximum 100 ads per day
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔹</span>
+                            10-minute break after every 10 ads
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔹</span>
+                            Disable adblocker to view ads
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-base md:text-lg mb-2 text-green-700">💡 Tips:</h4>
+                    <ul class="space-y-2 text-sm md:text-base text-gray-700">
+                        <li class="flex items-start">
+                            <span class="mr-2">🔸</span>
+                            Select an ad network to start
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔸</span>
+                            Wait for ads to fully load before timer starts
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔸</span>
+                            Don't close or refresh the page
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔸</span>
+                            Automatic coin reward on completion
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2">🔸</span>
+                            Progress saves even after refresh
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div><script>
+        let currentBalance = {{ user.coins }};
+        let directAdsWatchedToday = 0;
+        let consecutiveDirectAds = 0;
+        let isOnDirectCooldown = false;
+        let directCooldownEndTime = null;
+        let isDirectWatching = false;
+        let directSessionToken = null;
+        let adLinks = [];
+        let selectedAdUrl = '';
+        let adLoaded = false;
+        let timeLeft = 40;
+        let isAdStarted = false;
+        let adStartTime = null;
+        let countdownTimer = null;
+        const MAX_DAILY_ADS = 100;
+        const BREAK_AFTER_ADS = 10;
+        const BREAK_DURATION = 10 * 60 * 1000;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDirectUI();
+            checkDirectCooldownStatus();
+            loadAdLinks();
+        });
+
+        function updateDirectUI() {
+            document.getElementById('directAdsWatched').textContent = directAdsWatchedToday;
+            document.getElementById('directAdsRemaining').textContent = Math.max(0, MAX_DAILY_ADS - directAdsWatchedToday);
+            document.getElementById('directProgressText').textContent = `${directAdsWatchedToday}/${MAX_DAILY_ADS}`;
+
+            const progress = (directAdsWatchedToday / MAX_DAILY_ADS) * 100;
+            document.getElementById('directProgressBar').style.width = `${progress}%`;
+
+            const shouldDisable = directAdsWatchedToday >= MAX_DAILY_ADS || isOnDirectCooldown || isDirectWatching;
+
+            document.getElementById('directCooldownMessage').classList.toggle('hidden', !isOnDirectCooldown);
+            document.getElementById('directLimitMessage').classList.toggle('hidden', directAdsWatchedToday < MAX_DAILY_ADS);
+
+            if (directAdsWatchedToday >= MAX_DAILY_ADS) {
+                startDirectResetTimer();
+            }
+        }
+
+        function loadAdLinks() {
+            fetch('/api/get-ad-links')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.ad_links.length > 0) {
+                    adLinks = data.ad_links;
+                    displayAdButtons();
+                } else {
+                    document.getElementById('adButtonsContainer').innerHTML = `
+                        <div class="text-center text-red-500 p-8">
+                            <div class="text-4xl mb-2">❌</div>
+                            <p>No ad networks configured. Please contact admin.</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading ad links:', error);
+                document.getElementById('adButtonsContainer').innerHTML = `
+                    <div class="text-center text-red-500 p-8">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <p>Error loading ad networks. Please refresh.</p>
+                    </div>
+                `;
+            });
+        }
+
+        function displayAdButtons() {
+            const container = document.getElementById('adButtonsContainer');
+            let buttonsHtml = '';
+
+            adLinks.forEach((link, index) => {
+                buttonsHtml += `
+                    <button onclick="selectAd('${link.url}', '${link.name}')" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 shadow-lg">
+                        📱 Watch ${link.name}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = buttonsHtml;
+        }
+
+        function selectAd(adUrl, adName) {
+            if (isDirectWatching) {
+                showNotification('Please wait for current ad to complete.', 'error');
+                return;
+            }
+
+            if (directAdsWatchedToday >= MAX_DAILY_ADS || isOnDirectCooldown) {
+                showNotification('Daily limit reached or on cooldown.', 'error');
+                return;
+            }
+
+            selectedAdUrl = adUrl;
+            adLoaded = false;
+
+            // Check if ad should open in new tab or iframe
+            if (shouldOpenInNewTab(adUrl)) {
+                startDirectAdSessionNewTab(adName, adUrl);
+            } else {
+                startDirectAdSession(adName);
+            }
+        }
+
+        function shouldOpenInNewTab(url) {
+            // Check if URL contains common patterns that work better in new tabs
+            const newTabPatterns = [
+                'propellerads.com',
+                'exoclick.com',
+                'trafficstars.com',
+                'adskeeper.com',
+                'mgid.com',
+                'taboola.com',
+                'outbrain.com',
+                'adnow.com',
+                'revivehihi.com',
+                'popads.net',
+                'popcash.net',
+                'admaven.com',
+                'adsterra.com',
+                'clickadu.com',
+                'evadav.com',
+                'propushmedia.com',
+                'richpush.pro',
+                'exness.com',
+                'exness.global',
+                'trading.com',
+                'forex.com',
+                'teletrade.com',
+                'fxtm.com',
+                'javascript:',
+                '.js',
+                'script'
+            ];
+
+            return newTabPatterns.some(pattern => url.toLowerCase().includes(pattern.toLowerCase()));
+        }
+
+        function startDirectAdSessionNewTab(adName, adUrl) {
+            fetch('/start-direct-ad-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    directSessionToken = data.session_token;
+                    isDirectWatching = true;
+
+                    document.getElementById('statusMessage').classList.remove('hidden');
+                    document.querySelector('#mainTimer .mt-3').textContent = `Opening ${adName} in new tab...`;
+
+                    // Open ad in new tab
+                    const newTab = window.open(adUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+                    // Start countdown immediately
+                    setTimeout(() => {
+                        document.getElementById('statusMessage').classList.add('hidden');
+                        startDirectCountdown();
+                    }, 2000);
+
+                    // Monitor if tab is closed early
+                    const tabMonitor = setInterval(() => {
+                        if (newTab.closed) {
+                            clearInterval(tabMonitor);
+                            if (isDirectWatching && timeLeft > 30) {
+                                showNotification('Ad tab closed too early. Please watch full ad to earn coins.', 'error');
+                                resetDirectAdSystem();
+                            }
+                        }
+                    }, 1000);
+
+                    updateDirectUI();
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to start ad session. Please try again.', 'error');
+            });
+        }
+
+        function startDirectAdSession(adName) {
+            fetch('/start-direct-ad-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    directSessionToken = data.session_token;
+                    isDirectWatching = true;
+
+                    document.getElementById('statusMessage').classList.remove('hidden');
+                    document.querySelector('#mainTimer .mt-3').textContent = `Loading ${adName}...`;
+
+                    loadDirectAdInIframe();
+                    updateDirectUI();
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to start ad session. Please try again.', 'error');
+            });
+        }
+
+        async function detectAdBlocker() {
+            return new Promise((resolve) => {
+                const testAd = document.createElement('div');
+                testAd.innerHTML = '&nbsp;';
+                testAd.className = 'adsbox';
+                testAd.style.position = 'absolute';
+                testAd.style.left = '-10000px';
+                testAd.style.width = '1px';
+                testAd.style.height = '1px';
+                document.body.appendChild(testAd);
+
+                setTimeout(() => {
+                    const isBlocked = testAd.offsetHeight === 0;
+                    document.body.removeChild(testAd);
+                    resolve(isBlocked);
+                }, 100);
+            });
+        }
+
+        async function loadDirectAdInIframe() {
+            const adContainer = document.getElementById('adContainer');
+            const directAdStatus = document.getElementById('directAdStatus');
+
+            // Check for ad blocker first
+            const adBlockDetected = await detectAdBlocker();
+
+            if (adBlockDetected) {
+                showNotification('❌ AdBlock detected! Please disable your adblocker to earn coins.', 'error');
+                adContainer.innerHTML = `
+                    <div class="ad-iframe flex items-center justify-center bg-red-50 border-2 border-red-300">
+                        <div class="text-center text-red-600">
+                            <div class="text-4xl mb-2">🚫</div>
+                            <h3 class="text-lg font-bold mb-2">AdBlock Detected</h3>
+                            <p>Please disable your adblocker to view ads and earn coins</p>
+                        </div>
+                    </div>
+                `;
+                resetDirectAdSystem();
+                return;
+            }
+
+            // Check if this ad should open in new tab
+            if (shouldOpenInNewTab(selectedAdUrl)) {
+                adContainer.innerHTML = `
+                    <div class="ad-iframe flex items-center justify-center bg-blue-50 border-2 border-blue-300">
+                        <div class="text-center text-blue-600">
+                            <div class="text-4xl mb-2">🔗</div>
+                            <h3 class="text-lg font-bold mb-2">Ad Opened in New Tab</h3>
+                            <p>Please interact with the ad in the new tab to earn coins</p>
+                            <p class="text-sm mt-2">Keep this page open until timer completes</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            directAdStatus.classList.remove('hidden');
+            directAdStatus.textContent = 'Loading ads...';
+            directAdStatus.className = 'absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs';
+
+            // Try to detect if URL is a JavaScript snippet
+            if (selectedAdUrl.toLowerCase().includes('javascript:') || selectedAdUrl.toLowerCase().includes('.js')) {
+                adContainer.innerHTML = `
+                    <div class="ad-iframe flex items-center justify-center bg-green-50 border-2 border-green-300">
+                        <div class="text-center text-green-600">
+                            <div class="text-4xl mb-2">⚡</div>
+                            <h3 class="text-lg font-bold mb-2">Ad Script Loading...</h3>
+                            <p>Ad is loading in the background</p>
+                            <p class="text-sm mt-2">Please wait for timer to complete</p>
+                        </div>
+                    </div>
+                `;
+
+                // Execute JavaScript ad
+                try {
+                    if (selectedAdUrl.startsWith('javascript:')) {
+                        eval(selectedAdUrl.substring(11)); // Remove 'javascript:' prefix
+                    } else {
+                        // Load external script
+                        const script = document.createElement('script');
+                        script.src = selectedAdUrl;
+                        script.async = true;
+                        document.head.appendChild(script);
+                    }
+
+                    adLoaded = true;
+                    directAdStatus.textContent = 'Ad Running ✓';
+                    directAdStatus.className = 'absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs';
+
+                    setTimeout(() => {
+                        directAdStatus.classList.add('hidden');
+                        startDirectCountdown();
+                    }, 2000);
+
+                } catch (error) {
+                    console.log('Script execution error:', error);
+                    directAdStatus.textContent = 'Ad Failed ❌';
+                    directAdStatus.className = 'absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs';
+                    showNotification('Failed to load ad script. Please try another network.', 'error');
+                    resetDirectAdSystem();
+                }
+                return;
+            }
+
+            // Regular iframe loading for normal URLs
+            const iframe = document.createElement('iframe');
+            iframe.className = 'ad-iframe';
+            iframe.setAttribute('allow', 'autoplay; camera; microphone; geolocation; payment; accelerometer; gyroscope; encrypted-media');
+            iframe.setAttribute('referrerpolicy', 'unsafe-url');
+            iframe.style.background = 'white';
+            iframe.style.border = 'none';
+
+            let loadTimeout;
+            let adLoadedSuccessfully = false;
+            let hasTriedNewTab = false;
+
+            // Enhanced iframe load detection
+            iframe.onload = function() {
+                clearTimeout(loadTimeout);
+
+                try {
+                    // Try to access iframe content to check if it actually loaded
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                    // Check if iframe actually has content
+                    if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '' || 
+                        iframeDoc.body.innerHTML.includes('refused to connect') ||
+                        iframeDoc.documentElement.innerHTML.length < 50) {
+                        throw new Error('Empty or blocked content');
+                    }
+
+                    adLoadedSuccessfully = true;
+                    adLoaded = true;
+
+                    directAdStatus.textContent = 'Ad Running ✓';
+                    directAdStatus.className = 'absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs';
+
+                    document.getElementById('statusMessage').classList.add('hidden');
+                    document.querySelector('#mainTimer .mt-3').textContent = 'Ad loaded! Timer starting in 2 seconds...';
+
+                    setTimeout(() => {
+                        directAdStatus.classList.add('hidden');
+                    }, 3000);
+
+                    // Wait 2 seconds after load before starting timer
+                    setTimeout(() => {
+                        if (adLoadedSuccessfully) {
+                            startDirectCountdown();
+                        }
+                    }, 2000);
+
+                } catch (e) {
+                    // If we can't access iframe content or it's empty, try new tab
+                    if (!hasTriedNewTab) {
+                        hasTriedNewTab = true;
+                        showNotification('Ad blocked by security policy. Opening in new tab...', 'error');
+                        adContainer.innerHTML = `
+                            <div class="ad-iframe flex items-center justify-center bg-blue-50 border-2 border-blue-300">
+                                <div class="text-center text-blue-600">
+                                    <div class="text-4xl mb-2">🔗</div>
+                                    <h3 class="text-lg font-bold mb-2">Ad Opening in New Tab</h3>
+                                    <p>Ad opened in new tab. Keep this page open!</p>
+                                    <p class="text-sm mt-2">Timer will start automatically</p>
+                                </div>
+                            </div>
+                        `;
+
+                        // Open in new tab and start timer
+                        window.open(selectedAdUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+                        directAdStatus.textContent = 'New Tab Opened ✓';
+                        directAdStatus.className = 'absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs';
+
+                        setTimeout(() => {
+                            directAdStatus.classList.add('hidden');
+                            startDirectCountdown();
+                        }, 2000);
+                    }
+                }
+            };
+
+            iframe.onerror = function() {
+                clearTimeout(loadTimeout);
+                if (!hasTriedNewTab) {
+                    hasTriedNewTab = true;
+                    showNotification('Failed to load ad in iframe. Opening in new tab...', 'error');
+                    startDirectAdSessionNewTab('Fallback Ad', selectedAdUrl);
+                }
+            };
+
+            // Set iframe source
+            iframe.src = selectedAdUrl;
+
+            // Set a timeout for ad loading (6 seconds)
+            loadTimeout = setTimeout(() => {
+                if (!adLoadedSuccessfully && !hasTriedNewTab) {
+                    hasTriedNewTab = true;
+                    showNotification('Ad loading timeout. Opening in new tab...', 'error');
+
+                    // Remove iframe and show new tab message
+                    adContainer.innerHTML = `
+                        <div class="ad-iframe flex items-center justify-center bg-orange-50 border-2 border-orange-300">
+                            <div class="text-center text-orange-600">
+                                <div class="text-4xl mb-2">⏰</div>
+                                <h3 class="text-lg font-bold mb-2">Opening in New Tab</h3>
+                                <p>Ad taking too long to load in iframe</p>
+                                <p class="text-sm mt-2">Opening in new tab...</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Open in new tab
+                    window.open(selectedAdUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+                    directAdStatus.textContent = 'New Tab Timeout ✓';
+                    directAdStatus.className = 'absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs';
+
+                    setTimeout(() => {
+                        directAdStatus.classList.add('hidden');
+                        startDirectCountdown();
+                    }, 2000);
+                }
+            }, 6000);
+
+            // Clear container and add iframe with error wrapper
+            adContainer.innerHTML = '';
+
+            // Create a wrapper div for better error handling
+            const iframeWrapper = document.createElement('div');
+            iframeWrapper.className = 'w-full h-full relative';
+            iframeWrapper.appendChild(iframe);
+
+            adContainer.appendChild(iframeWrapper);
+
+            // Additional check after a short delay
+            setTimeout(() => {
+                try {
+                    if (!adLoadedSuccessfully && iframe.contentWindow) {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (!iframeDoc || iframeDoc.body.innerHTML.includes('refused to connect')) {
+                            throw new Error('Connection refused detected');
+                        }
+                    }
+                } catch (e) {
+                    if (!hasTriedNewTab) {
+                        hasTriedNewTab = true;
+                        showNotification('Ad connection blocked. Opening in new tab...', 'error');
+                        window.open(selectedAdUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+                        adContainer.innerHTML = `
+                            <div class="ad-iframe flex items-center justify-center bg-green-50 border-2 border-green-300">
+                                <div class="text-center text-green-600">
+                                    <div class="text-4xl mb-2">✅</div>
+                                    <h3 class="text-lg font-bold mb-2">Ad Opened Successfully</h3>
+                                    <p>Ad opened in new tab due to security restrictions</p>
+                                    <p class="text-sm mt-2">Timer starting automatically</p>
+                                </div>
+                            </div>
+                        `;
+
+                        setTimeout(() => {
+                            startDirectCountdown();
+                        }, 2000);
+                    }
+                }
+            }, 3000);
+        }
+
+        function startDirectCountdown() {
+            timeLeft = 40;
+            isAdStarted = true;
+            adStartTime = new Date();
+            const countdownElement = document.getElementById('countdown');
+            const timerText = document.querySelector('#mainTimer .mt-3');
+
+            timerText.textContent = 'Watching direct ad... Please wait';
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                countdownElement.textContent = timeLeft;
+                timerText.textContent = `Watching direct ad... ${timeLeft}s remaining`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    completeDirectAd();
+                }
+            }, 1000);
+        }
+
+        function completeDirectAd() {
+            fetch('/complete-direct-ad-task', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_token: directSessionToken })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    directAdsWatchedToday = data.direct_ads_watched;
+                    consecutiveDirectAds++;
+                    currentBalance = data.new_balance;
+
+                    if (consecutiveDirectAds >= BREAK_AFTER_ADS) {
+                        isOnDirectCooldown = true;
+                        directCooldownEndTime = new Date(Date.now() + BREAK_DURATION);
+                        consecutiveDirectAds = 0;
+                        startDirectCooldownTimer();
+                    }
+
+                    showNotification(`🎉 +0.5 coins earned! New balance: ${data.new_balance.toFixed(1)} coins`, 'success');
+                    resetDirectAdSystem();
+                    updateDirectUI();
+                } else {
+                    showNotification(data.message, 'error');
+                    resetDirectAdSystem();
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to complete ad. Please try again.', 'error');
+                resetDirectAdSystem();
+            });
+        }
+
+        function resetDirectAdSystem() {
+            isDirectWatching = false;
+            directSessionToken = null;
+            selectedAdUrl = '';
+            adLoaded = false;
+            isAdStarted = false;
+            timeLeft = 40;
+
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+
+            document.getElementById('countdown').textContent = '40';
+            document.querySelector('#mainTimer .mt-3').textContent = 'Select an ad below to start';
+            document.getElementById('statusMessage').classList.add('hidden');
+            document.getElementById('directAdStatus').classList.add('hidden');
+
+            document.getElementById('adContainer').innerHTML = `
+                <div class="ad-iframe flex items-center justify-center text-gray-500">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">📺</div>
+                        <p>Select an ad network above tostart watching</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkDirectCooldownStatus() {
+            if (directCooldownEndTime && new Date() < directCooldownEndTime) {
+                isOnDirectCooldown = true;
+                startDirectCooldownTimer();
+            } else if (directCooldownEndTime && new Date() >= directCooldownEndTime) {
+                isOnDirectCooldown = false;
+                directCooldownEndTime = null;
+            }
+        }
+
+        function startDirectCooldownTimer() {
+            if (!directCooldownEndTime) return;
+
+            const timer = setInterval(() => {
+                const now = new Date();
+                const remaining = directCooldownEndTime - now;
+
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    isOnDirectCooldown = false;
+                    directCooldownEndTime = null;
+                    updateDirectUI();
+                } else {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    document.getElementById('directCooldownTimer').textContent = 
+                        `Break ends in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function startDirectResetTimer() {
+            const timer = setInterval(() => {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+
+                const remaining = tomorrow - now;
+                const hours = Math.floor(remaining / 3600000);
+                const minutes = Math.floor((remaining % 3600000) / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+
+                document.getElementById('directResetTimerText').textContent = 
+                    `${hours}h ${minutes}m ${seconds}s`;
+            }, 1000);
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon = type === 'success' ? '✅' : '❌';
+
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm`;
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <span class="text-lg mr-2">${icon}</span>
+                    <span class="text-sm">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

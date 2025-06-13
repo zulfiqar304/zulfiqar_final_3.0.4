@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZMworld - Social Media Marketing Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .hero-text {
+                font-size: 2rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">ZMworld.org </h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('login') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                        Login
+                    </a>
+                    <a href="{{ url_for('register') }}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                        Register
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Registration Requirement Alert -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        <strong>Important:</strong> You must <a href="{{ url_for('register') }}" class="underline font-semibold">register an account</a> to use our website services. Registration is free and takes only 1 minute!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="hero-text text-4xl md:text-6xl font-bold mb-6">
+                Boost Your Social Media Presence
+            </h1>
+            <p class="hero-subtitle text-xl md:text-2xl mb-8 opacity-90">
+                Get followers, likes, views, and more for all major social platforms
+            </p>
+            
+            <!-- Login Bonus Information -->
+            <div class="max-w-4xl mx-auto mb-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 border border-white border-opacity-30">
+                    <h3 class="text-2xl font-bold mb-4">🎁 Daily Login Rewards</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-500 bg-opacity-30 rounded-lg p-4">
+                            <div class="text-3xl mb-2">🌐</div>
+                            <h4 class="text-lg font-semibold mb-2">Browser Login</h4>
+                            <p class="text-blue-100">Login through website browser and earn <strong>2 coins daily</strong></p>
+                        </div>
+                        <div class="bg-green-500 bg-opacity-30 rounded-lg p-4">
+                            <div class="text-3xl mb-2">📱</div>
+                            <h4 class="text-lg font-semibold mb-2">Mobile App Login</h4>
+                            <p class="text-green-100">Login through our mobile app and earn <strong>5 coins daily</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="{{ url_for('register') }}" class="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105">
+                    🚀 Get Started Free
+                </a>
+                <a href="{{ url_for('login') }}" class="inline-block bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+                    Login to Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcements -->
+    {% if announcements %}
+    <section class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {% for announcement in announcements %}
+            <div class="mb-4 p-4 rounded-lg {% if announcement.background_color %}{{ announcement.background_color }}{% else %}bg-blue-100{% endif %}">
+                <h3 class="font-bold text-lg">{{ announcement.title }}</h3>
+                {% if announcement.highlight_text %}
+                <p class="text-sm font-semibold text-blue-600">{{ announcement.highlight_text }}</p>
+                {% endif %}
+                <p class="text-gray-700">{{ announcement.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Why Choose Our Platform?</h2>
+                <p class="text-xl text-gray-600">Fast, reliable, and affordable social media marketing services</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="text-xl font-semibold mb-4">Lightning Fast</h3>
+                    <p class="text-gray-600">Orders start processing within minutes of placement</p>
+                </div>
+                
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-xl font-semibold mb-4">Earn While You Use</h3>
+                    <p class="text-gray-600">Watch ads to earn coins and get services for free</p>
+                </div>
+                
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-semibold mb-4">High Quality</h3>
+                    <p class="text-gray-600">Real engagement from active users, not bots</p>
+                </div>
+                
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🔒</div>
+                    <h3 class="text-xl font-semibold mb-4">100% Safe</h3>
+                    <p class="text-gray-600">Secure payment processing and account protection</p>
+                </div>
+                
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h3 class="text-xl font-semibold mb-4">Mobile Friendly</h3>
+                    <p class="text-gray-600">Works perfectly on all devices and platforms</p>
+                </div>
+                
+                <div class="card-hover bg-gray-50 p-8 rounded-xl text-center">
+                    <div class="text-4xl mb-4">💬</div>
+                    <h3 class="text-xl font-semibold mb-4">24/7 Support</h3>
+                    <p class="text-gray-600">Round-the-clock customer support via chat</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Earn Coins Section -->
+    <section class="py-20 bg-gradient-to-br from-green-50 to-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">💰 How to Earn Free Coins</h2>
+                <p class="text-xl text-gray-600">Multiple ways to earn coins and get free services</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center card-hover">
+                    <div class="text-3xl mb-3">📺</div>
+                    <h3 class="font-semibold mb-2">Watch Ads</h3>
+                    <p class="text-sm text-gray-600">Earn 0.5 coins per ad session</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center card-hover">
+                    <div class="text-3xl mb-3">🎯</div>
+                    <h3 class="font-semibold mb-2">Daily Login</h3>
+                    <p class="text-sm text-gray-600">Get 2-5 coins for daily login</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center card-hover">
+                    <div class="text-3xl mb-3">🎡</div>
+                    <h3 class="font-semibold mb-2">Spin Wheel</h3>
+                    <p class="text-sm text-gray-600">Daily free spin for bonus coins</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center card-hover">
+                    <div class="text-3xl mb-3">👥</div>
+                    <h3 class="font-semibold mb-2">Referrals</h3>
+                    <p class="text-sm text-gray-600">Earn bonus spins for referrals</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Boost Your Social Media?</h2>
+            <p class="text-xl mb-8 opacity-90">Join thousands of satisfied customers worldwide</p>
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="{{ url_for('register') }}" class="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105">
+                    Start Earning Coins Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">SMM Panel</h3>
+                    <p class="text-gray-400">Your trusted partner for social media growth and marketing services.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Instagram Services</li>
+                        <li>Facebook Services</li>
+                        <li>YouTube Services</li>
+                        <li>Twitter Services</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Earn Coins</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Watch Ads</li>
+                        <li>Daily Login</li>
+                        <li>Spin Wheel</li>
+                        <li>Referral Program</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Help Center</li>
+                        <li>Contact Us</li>
+                        <li>Terms of Service</li>
+                        <li>Privacy Policy</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 zmworld.org. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle and smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all card elements
+        document.querySelectorAll('.card-hover').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdBlock Violations - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Admin Navigation -->
+    <nav class="bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold">🚫 AdBlock Violations Monitor</h1>
+                <div class="flex space-x-2 md:space-x-4">
+                    <a href="{{ url_for('admin_panel') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                        Admin Panel
+                    </a>
+                    <a href="{{ url_for('admin_logout') }}" class="bg-red-500 hover:bg-red-600 px-3 md:px-4 py-2 rounded-lg transition text-sm md:text-base">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-r-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+                <h3 class="text-lg font-semibold text-red-600 mb-2">🚫 Total Violations</h3>
+                <div class="text-3xl font-bold text-red-700">{{ stats.total_violations }}</div>
+                <p class="text-sm text-gray-600 mt-2">All time violations detected</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                <h3 class="text-lg font-semibold text-orange-600 mb-2">📅 Today's Violations</h3>
+                <div class="text-3xl font-bold text-orange-700">{{ stats.today_violations }}</div>
+                <p class="text-sm text-gray-600 mt-2">Violations detected today</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+                <h3 class="text-lg font-semibold text-yellow-600 mb-2">⚠️ Repeat Offenders</h3>
+                <div class="text-3xl font-bold text-yellow-700">{{ stats.repeat_offenders }}</div>
+                <p class="text-sm text-gray-600 mt-2">Users with 10+ violations</p>
+            </div>
+        </div>
+
+        <!-- Violations Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">🔍 AdBlock Violation History</h2>
+                <p class="text-gray-600 mt-1">Monitor users attempting to use adblockers</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Violations</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Agent</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for violation, user in violations %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ user.username }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ user.email }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ violation.violation_date }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if violation.violation_count >= 10 %}bg-red-100 text-red-800
+                                    {% elif violation.violation_count >= 5 %}bg-orange-100 text-orange-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ violation.violation_count }} violations
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ violation.ip_address }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                                {{ violation.user_agent[:50] }}...
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <form method="POST" action="{{ url_for('toggle_ban_user', user_id=user.id) }}" class="inline">
+                                    <button type="submit" class="{% if user.is_banned %}bg-green-600 hover:bg-green-700{% else %}bg-red-600 hover:bg-red-700{% endif %} text-white px-3 py-1 rounded text-xs">
+                                        {% if user.is_banned %}Unban{% else %}Ban User{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not violations %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                No AdBlock violations detected yet.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Information Box -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-blue-800 mb-4">📋 AdBlock Detection System</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-blue-700 mb-2">🔍 How it works:</h4>
+                    <ul class="space-y-1 text-sm text-gray-700">
+                        <li>• Detects when users have adblockers enabled</li>
+                        <li>• Prevents timer from starting if ads are blocked</li>
+                        <li>• Logs all violation attempts with user details</li>
+                        <li>• Tracks repeat offenders for admin action</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-blue-700 mb-2">⚡ Admin Actions:</h4>
+                    <ul class="space-y-1 text-sm text-gray-700">
+                        <li>• Ban users with excessive violations</li>
+                        <li>• Monitor IP addresses for patterns</li>
+                        <li>• Track user agents for detection bypasses</li>
+                        <li>• View daily violation statistics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

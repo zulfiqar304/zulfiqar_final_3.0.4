@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ZMWORLD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Push notification scripts (hidden from user) -->
+    <script style="display:none;" data-cfasync="false" type="text/javascript">
+    // Ad detection and push notification scripts
+    (function(){
+        try {
+            // Hidden push notification initialization
+            var script = document.createElement('script');
+            script.src = '//vaugroar.com/ntfc.php?p=9425059';
+            script.setAttribute('data-cfasync', 'false');
+            script.async = true;
+            script.onerror = function() { if(typeof _slvebg === 'function') _slvebg(); };
+            script.onload = function() { if(typeof _rgbzy === 'function') _rgbzy(); };
+            document.head.appendChild(script);
+        } catch(e) {
+            console.log('Notification script loading failed');
+        }
+    })();
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .coin-animation {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">👋 Welcome back, {{ user.username }}!</h1>
+                    <p class="text-blue-100 mt-2">Ready to boost your social media presence?</p>
+                </div>
+                <div class="text-right">
+                    <nav class="space-x-4">
+                    <a href="{{ url_for('logout') }}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition duration-200">
+                        🚪 Logout
+                    </a>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+
+        <!-- User Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Profile Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 p-3 rounded-full mr-4">
+                        <span class="text-2xl">👤</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Profile</h3>
+                        <p class="text-gray-600">Account Information</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <p class="flex items-center text-gray-700">
+                        <span class="mr-2">📧</span>
+                        <strong class="mr-2">Email:</strong> 
+                        <span class="text-blue-600">{{ user.email }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Coins Card -->
+            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg p-6 text-white card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">Your Balance</h3>
+                        <p class="text-yellow-100">Available Coins</p>
+                    </div>
+                    <div class="coin-animation">
+                        <span class="text-4xl">💰</span>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-4xl font-bold mb-2">{{ user.coins }}</p>
+                    <p class="text-yellow-100">💰 Coins Available</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 p-3 rounded-full mr-4">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Quick Stats</h3>
+                        <p class="text-gray-600">Account Overview</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">🎯 Status:</span>
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Active</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">⭐ Level:</span>
+                        {% if user_level.level == 'Expert' %}
+                            <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">🏆 {{ user_level.name }}</span>
+                        {% elif user_level.level == 'Professional' %}
+                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">⚡ {{ user_level.name }}</span>
+                        {% else %}
+                            <span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-semibold">🌟 {{ user_level.name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">📦 Orders:</span>
+                        <span class="text-gray-800 font-semibold">{{ user_level.orders }} completed</span>
+                    </div>
+                    {% if user_level.next_level %}
+                    <div class="mt-2 p-2 bg-gray-50 rounded-lg">
+                        <div class="text-xs text-gray-600 mb-1">Next Level: {{ user_level.next_level }}</div>
+                        <div class="text-xs text-gray-700">{{ user_level.orders_needed }} more orders needed</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            {% if user_level.level == 'Beginner' %}
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ (user_level.orders / 10) * 100 }}%"></div>
+                            {% elif user_level.level == 'Professional' %}
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: {{ ((user_level.orders - 10) / 40) * 100 }}%"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mt-2 p-2 bg-purple-50 rounded-lg">
+                        <div class="text-xs text-purple-600">🎉 Maximum level achieved!</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Place Order Card -->
+            <div class="bg-white rounded-xl shadow-lg p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">🛒</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Place New Order</h3>
+                    <p class="text-gray-600 mb-6">Choose from our premium social media services</p>
+                    <a href="{{ url_for('place_order') }}" 
+                       class="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition duration-200 font-semibold shadow-lg">
+                        🚀 Start Order
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order History Card -->
+            <div class="bg-white rounded-xl shadow-lg p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">📋</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Order History</h3>
+                    <p class="text-gray-600 mb-6">Track your previous orders and their status</p>
+                    <a href="{{ url_for('order_history') }}" 
+                       class="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition duration-200 font-semibold shadow-lg">
+                        📈 View History
+                    </a>
+                </div>
+            </div>
+
+            <!-- Watch Ads Card -->
+            <div class="bg-white rounded-xl shadow-lg p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">📺</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Complete Easy Task</h3>
+                    <p class="text-gray-600 mb-6">Watch 30-second ads to earn 0.5 coins each</p>
+                    <div class="space-y-3">
+                        <a href="{{ url_for('watch_ad') }}" 
+                           class="block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition duration-200 font-semibold shadow-lg">
+                            📺 Watch Task & Earn 💰
+                        </a>
+                        <div class="text-xs text-gray-500 mt-2">
+                            Daily Limit: 100 ads • Break: 10 min after 10 ads<br>
+                            📱 Some ads may open in new tab for better compatibility<br>
+                            <span id="currentAdStats" class="text-blue-600">Loading current stats...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <!-- Spin Wheel Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-purple-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl md:text-3xl">🎡</span>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-2">Daily Spin Wheel</h3>
+                    <p class="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Spin daily to win coins and prizes</p>
+                    <a href="{{ url_for('spin_wheel') }}" 
+                       class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 md:px-8 md:py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition duration-200 font-semibold shadow-lg text-sm md:text-base">
+                        🎡 Spin Wheel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Buy Coins Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-green-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl md:text-3xl">💳</span>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-2">Buy Coins</h3>
+                    <p class="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Purchase coins with EasyPaisa</p>
+                    <a href="{{ url_for('buy_coins') }}" 
+                       class="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 md:px-8 md:py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition duration-200 font-semibold shadow-lg text-sm md:text-base">
+                        💳 Buy with EasyPaisa
+                    </a>
+                </div>
+            </div>
+
+            <!-- Help Videos Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                <div class="text-center">
+                    <div class="bg-red-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl md:text-3xl">📹</span>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-2">Help Videos</h3>
+                    <p class="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Watch tutorials and guides</p>
+                    <a href="{{ url_for('help_videos') }}" 
+                       class="inline-block bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 md:px-8 md:py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition duration-200 font-semibold shadow-lg text-sm md:text-base">
+                        📹 Watch Videos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- APK Download Section -->
+        <div class="mt-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <span class="text-4xl mr-3">📱</span>
+                    <div>
+                        <h3 class="text-xl font-bold">Download ZMWORLD App</h3>
+                        <p class="text-green-100">Get our mobile app for better experience!</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <p class="text-green-100">📲 Faster access • 🔔 Push notifications • 📱 Mobile optimized</p>
+                    <div id="apk-download-section">
+                        <div id="no-apk-message" class="bg-white bg-opacity-20 rounded-lg p-4 mb-4">
+                            <p class="text-white">📱 APK file will be available soon!</p>
+                            <p class="text-green-100 text-sm">We're working on the mobile app. Check back later.</p>
+                        </div>
+                        <div id="apk-available" style="display: none;" class="space-y-3">
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                <h4 class="font-bold mb-2">📥 Latest Version: ZMWORLD v1.0</h4>
+                                <p class="text-green-100 text-sm mb-3">Size: ~5MB • Compatible with Android 5.0+</p>
+                                <a href="#" id="apk-download-link" 
+                                   class="inline-block bg-white text-green-600 px-8 py-3 rounded-lg hover:bg-green-50 transition duration-200 font-bold shadow-lg">
+                                    📲 Download APK
+                                </a>
+                            </div>
+                            <p class="text-green-100 text-xs">⚠️ Enable "Install from unknown sources" in your device settings to install the APK</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referral System Section -->
+        <div class="mt-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <span class="text-4xl mr-3">👥</span>
+                    <div>
+                        <h3 class="text-xl font-bold">Referral System</h3>
+                        <p class="text-purple-100">Invite friends and earn free spins!</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    {% if referral_stats.available_spins > 0 %}
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3 mb-3">
+                        <div class="text-white font-bold">🎉 {{ referral_stats.available_spins }} Free Spins Available!</div>
+                    </div>
+                    {% endif %}
+                    <p class="text-purple-100">🔗 Share your referral link • 🎁 Earn rewards • 🎡 Get free spins</p>
+                    <a href="{{ url_for('referrals') }}" 
+                       class="inline-block bg-white text-purple-600 px-8 py-3 rounded-lg hover:bg-purple-50 transition duration-200 font-bold shadow-lg">
+                        👥 Manage Referrals
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Group Section -->
+        <div class="mt-8 bg-gradient-to-r from-green-400 to-green-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <span class="text-4xl mr-3">📱</span>
+                    <div>
+                        <h3 class="text-xl font-bold">Join Our WhatsApp Group</h3>
+                        <p class="text-green-100">Get instant updates, announcements & exclusive offers!</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <p class="text-green-100">🔔 New service updates • 💰 Special discounts • 📢 Important announcements</p>
+                    <a href="https://chat.whatsapp.com/GiSE3VmctNCKoKIHmx7U9e" 
+                       target="_blank"
+                       class="inline-block bg-white text-green-600 px-8 py-3 rounded-lg hover:bg-green-50 transition duration-200 font-bold shadow-lg">
+                        📲 Join WhatsApp Group
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Section -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center">
+            <div class="flex items-center justify-center mb-4">
+                <span class="text-3xl mr-3">🎧</span>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Need Help?</h3>
+                    <p class="text-gray-600">Our support team is here to assist you</p>
+                </div>
+            </div>
+            <a href="{{ url_for('support') }}" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold shadow-lg">
+                🎧 Contact Support
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-500 pb-8">
+            <p>💡 Need more coins? Daily login bonus: <strong>+5 coins</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Check APK availability and load ad stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load APK availability
+            fetch('/api/check-apk-availability')
+                .then(response => response.json())
+                .then(data => {
+                    const noApkMessage = document.getElementById('no-apk-message');
+                    const apkAvailable = document.getElementById('apk-available');
+                    const downloadLink = document.getElementById('apk-download-link');
+
+                    if (data.available) {
+                        noApkMessage.style.display = 'none';
+                        apkAvailable.style.display = 'block';
+
+                        // Update APK details
+                        const versionElement = apkAvailable.querySelector('h4');
+                        const sizeElement = apkAvailable.querySelector('p');
+
+                        versionElement.textContent = `📥 Latest Version: ${data.app_name} v${data.version}`;
+                        sizeElement.innerHTML = `Size: ~${data.size}MB • Compatible with Android 5.0+ <br>
+                                                ${data.description ? '<span class="text-green-200 text-xs">' + data.description + '</span>' : ''}`;
+
+                        downloadLink.href = data.download_url;
+                    } else {
+                        noApkMessage.style.display = 'block';
+                        apkAvailable.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking APK availability:', error);
+                });
+
+            // Load current ad watching stats
+            fetch('/api/get-user-ad-session')
+                .then(response => response.json())
+                .then(data => {
+                    const statsElement = document.getElementById('currentAdStats');
+                    if (data.success && statsElement) {
+                        const watchAd1 = data.ads_watched || 0;
+                        const totalToday = watchAd1;
+
+                        statsElement.textContent = `Today: Watch Ad 1 (${watchAd1}/100) • Total: ${totalToday}/100`;
+                    } else if (statsElement) {
+                        statsElement.textContent = 'Unable to load current stats';
+                    }
+                })
+                .catch(error => {
+                    console.log('Could not load ad stats:', error);
+                    const statsElement = document.getElementById('currentAdStats');
+                    if (statsElement) {
+                        statsElement.textContent = 'Stats unavailable';
+                    }
+                });
+        });
+    </script>
+</body>
+</html>

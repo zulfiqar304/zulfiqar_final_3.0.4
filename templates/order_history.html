@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📜 Order History</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .status-pending { color: orange; font-weight: bold; }
+        .status-processing { color: blue; font-weight: bold; }
+        .status-partial { color: purple; font-weight: bold; }
+        .status-completed { color: green; font-weight: bold; }
+        .status-cancelled { color: red; font-weight: bold; }
+        .status-failed { color: red; font-weight: bold; }
+        
+        .progress-info {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 80px;
+            height: 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            margin: 2px auto;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        
+        .completion-time {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .update-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .update-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .update-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .completion-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📜 Your Order History</h2>
+    {% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>🆔 Order ID</th>
+                <th>🔧 Service</th>
+                <th>🔗 Link</th>
+                <th>🔢 Quantity</th>
+                <th>📈 Progress</th>
+                <th>💰 Coins</th>
+                <th>⏰ Order Date</th>
+                <th>✅ Completion</th>
+                <th>📊 Status</th>
+                <th>🔄 Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr id="order-{{ order.id }}">
+                <td>{{ order.id }}</td>
+                <td>{{ order.service_name or order.service or 'N/A' }}</td>
+                <td><a href="{{ order.link }}" target="_blank">🔗 View</a></td>
+                <td>{{ order.quantity }}</td>
+                <td>
+                    {% if order.start_count > 0 %}
+                        <div class="progress-info">
+                            <div>Started: {{ order.start_count }}</div>
+                            <div>Remaining: {{ order.remains or 0 }}</div>
+                            {% if order.quantity > 0 %}
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ ((order.start_count / order.quantity) * 100) | round }}%"></div>
+                                </div>
+                                <small>{{ ((order.start_count / order.quantity) * 100) | round }}% done</small>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <span class="text-gray-500">Not started</span>
+                    {% endif %}
+                </td>
+                <td>{{ order.coins_required }}</td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if order.completion_time %}
+                        <span class="completion-time">{{ order.completion_time }}</span>
+                    {% else %}
+                        <span class="text-gray-500">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.status == 'Pending' %}
+                        <span class="status-pending">⏳ Pending</span>
+                    {% elif order.status == 'Processing' %}
+                        <span class="status-processing">🔄 Processing</span>
+                    {% elif order.status == 'Partial' %}
+                        <span class="status-partial">⚡ Partial</span>
+                    {% elif order.status == 'Completed' %}
+                        <span class="status-completed">✅ Completed</span>
+                    {% elif order.status == 'Cancelled' %}
+                        <span class="status-cancelled">❌ Cancelled</span>
+                    {% else %}
+                        <span class="status-failed">❌ {{ order.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.status in ['Pending', 'Processing', 'Partial'] and order.jap_order_id %}
+                        <button onclick="updateOrderStatus({{ order.id }})" class="update-btn" id="update-btn-{{ order.id }}">
+                            🔄 Update
+                        </button>
+                    {% elif order.status == 'Completed' %}
+                        <span class="completion-badge">✅ Done</span>
+                    {% else %}
+                        <span class="text-gray-500">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="text-align:center; font-size: 18px;">📭 No orders placed yet.</p>
+    {% endif %}
+</div>
+
+<script>
+function updateOrderStatus(orderId) {
+    const button = document.getElementById(`update-btn-${orderId}`);
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '⏳ Updating...';
+    }
+    
+    fetch(`/api/update-order-status/${orderId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the order row dynamically without page reload
+            updateOrderRow(orderId, data);
+            
+            // Show success message
+            showNotification(`✅ Order #${orderId} updated: ${data.status}`, 'success');
+            
+            // If completed, celebrate!
+            if (data.status === 'Completed') {
+                showNotification(`🎉 Order #${orderId} completed successfully!`, 'success');
+            }
+        } else {
+            alert('Failed to update order status: ' + data.message);
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '🔄 Update';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating order status');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '🔄 Update';
+        }
+    });
+}
+
+function updateOrderRow(orderId, data) {
+    const row = document.getElementById(`order-${orderId}`);
+    if (!row) return;
+    
+    // Update progress
+    const progressCell = row.cells[4];
+    if (data.start_count > 0) {
+        progressCell.innerHTML = `
+            <div class="progress-info">
+                <div>Started: ${data.start_count}</div>
+                <div>Remaining: ${data.remains || 0}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${data.progress_percentage || 0}%"></div>
+                </div>
+                <small>${data.progress_percentage || 0}% done</small>
+            </div>
+        `;
+    }
+    
+    // Update completion time
+    if (data.completion_time) {
+        row.cells[7].innerHTML = `<span class="completion-time">${data.completion_time}</span>`;
+    }
+    
+    // Update status
+    const statusCell = row.cells[8];
+    let statusClass = '';
+    let statusText = '';
+    
+    switch(data.status) {
+        case 'Pending':
+            statusClass = 'status-pending';
+            statusText = '⏳ Pending';
+            break;
+        case 'Processing':
+            statusClass = 'status-processing';
+            statusText = '🔄 Processing';
+            break;
+        case 'Partial':
+            statusClass = 'status-partial';
+            statusText = '⚡ Partial';
+            break;
+        case 'Completed':
+            statusClass = 'status-completed';
+            statusText = '✅ Completed';
+            break;
+        case 'Cancelled':
+            statusClass = 'status-cancelled';
+            statusText = '❌ Cancelled';
+            break;
+        default:
+            statusClass = 'status-failed';
+            statusText = `❌ ${data.status}`;
+    }
+    
+    statusCell.innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+    
+    // Update action button
+    const actionCell = row.cells[9];
+    if (data.status === 'Completed') {
+        actionCell.innerHTML = '<span class="completion-badge">✅ Done</span>';
+    } else if (data.status in ['Pending', 'Processing', 'Partial']) {
+        actionCell.innerHTML = `<button onclick="updateOrderStatus(${orderId})" class="update-btn" id="update-btn-${orderId}">🔄 Update</button>`;
+    }
+}
+
+function updateAllOrders() {
+    const updateButton = document.getElementById('update-all-btn');
+    if (updateButton) {
+        updateButton.disabled = true;
+        updateButton.innerHTML = '⏳ Updating All...';
+    }
+    
+    fetch('/api/update-all-orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`✅ Updated ${data.updated_count} orders successfully!`, 'success');
+            
+            // Update each order row
+            data.updated_orders.forEach(order => {
+                updateOrderRow(order.id, order);
+            });
+            
+            if (updateButton) {
+                updateButton.disabled = false;
+                updateButton.innerHTML = '🔄 Update All';
+            }
+        } else {
+            alert('Failed to update orders: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating orders');
+        if (updateButton) {
+            updateButton.disabled = false;
+            updateButton.innerHTML = '🔄 Update All';
+        }
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.innerHTML = message;
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: ${type === 'success' ? '#28a745' : '#007bff'}; 
+        color: white; padding: 12px 20px; border-radius: 8px; 
+        font-size: 14px; z-index: 1000; max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Auto-refresh page every 3 minutes for pending/processing orders (reduced from 5 minutes)
+document.addEventListener('DOMContentLoaded', function() {
+    const pendingOrders = document.querySelectorAll('.status-pending, .status-processing, .status-partial');
+    
+    // Add update all button if there are pending orders
+    if (pendingOrders.length > 0) {
+        const container = document.querySelector('.container');
+        const updateAllBtn = document.createElement('div');
+        updateAllBtn.style.cssText = 'text-align: center; margin: 20px 0;';
+        updateAllBtn.innerHTML = `
+            <button onclick="updateAllOrders()" id="update-all-btn" class="update-btn" style="padding: 8px 16px; font-size: 14px;">
+                🔄 Update All Orders
+            </button>
+            <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                Manually check all pending orders from JAP API
+            </p>
+        `;
+        container.insertBefore(updateAllBtn, container.querySelector('table'));
+        
+        // Auto-refresh after 3 minutes
+        setTimeout(() => {
+            location.reload();
+        }, 180000); // 3 minutes
+        
+        // Show auto-refresh indicator
+        const indicator = document.createElement('div');
+        indicator.innerHTML = '🔄 Auto-refresh in 3 minutes';
+        indicator.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #007bff; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; z-index: 1000;';
+        document.body.appendChild(indicator);
+        
+        // Hide indicator after 3 seconds
+        setTimeout(() => {
+            indicator.remove();
+        }, 3000);
+    }
+});
+</script>
+
+</body>
+</html>
